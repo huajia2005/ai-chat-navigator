@@ -101,6 +101,8 @@ function updateSiteName(name) {
   if (siteNameEl) {
     currentSiteName = name;
     siteNameEl.textContent = name;
+    // 更新标题
+    document.title = `${name} 导航器`;
   }
 }
 
@@ -121,7 +123,7 @@ function escapeRegExp(string) {
 function renderEmptyState() {
   chatHistoryEl.innerHTML = `
     <div class="empty-state">
-      <div class="empty-icon">📝</div>
+      <div class="empty-icon">🧭</div>
       <div class="empty-title">暂无聊天记录</div>
       <div class="empty-subtitle">与${currentSiteName || 'AI助手'}对话后，您的聊天记录将显示在这里</div>
     </div>
@@ -207,7 +209,7 @@ window.addEventListener('message', function(event) {
 // 页面加载完成
 document.addEventListener('DOMContentLoaded', function() {
   initEventListeners();
-  showToast('聊天记录侧边栏已加载');
+  showToast('AI聊天导航器已加载');
 });
 
 // 快捷键支持

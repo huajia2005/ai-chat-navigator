@@ -297,6 +297,68 @@ html, body {
   border-top: 1px solid var(--border-light);
 }
 
+/* GitHub链接样式 */
+.github-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--text-light);
+  gap: 4px;
+  transition: color 0.2s;
+}
+
+.github-link:hover {
+  color: var(--primary-color);
+}
+
+.github-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .version {
   opacity: 0.7;
+}
+
+/* 暗黑模式支持 */
+@media (prefers-color-scheme: dark) {
+  #app-container {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+  }
+
+  .ai-sidebar {
+    --text-primary: #e0e0e0;
+    --text-secondary: #aaa;
+    --text-light: #888;
+    --border-light: #333;
+    --highlight: #182635;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+  }
+
+  #search-input {
+    background: #2d2d2d;
+    color: #e0e0e0;
+    border-color: #444;
+  }
+
+  #search-container {
+    background: rgba(35, 35, 35, 0.7);
+  }
+
+  .footer {
+    background: #252525;
+    border-top-color: #333;
+  }
+
+  .empty-icon {
+    background: #252525;
+    color: #666;
+  }
+
+  .chat-msg.clickable:hover {
+    background: #182635;
+  }
 }
