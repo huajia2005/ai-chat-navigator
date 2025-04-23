@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>AI聊天记录</title>
+  <link rel="stylesheet" href="sidebar.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body class="ai-sidebar">
+<div id="app-container" class="ai-sidebar">
+  <div id="sidebar-header">
+    <div class="header-title">
+      <span class="header-icon">💬</span>
+      <span><span id="site-name">AI助手</span> 聊天记录</span>
+    </div>
+    <div class="header-actions">
+      <button class="action-button" id="refresh-btn" title="刷新聊天记录">🔄</button>
+      <button class="action-button" id="scroll-top-btn" title="回到顶部">↑</button>
+    </div>
+  </div>
+
+  <div id="search-container">
+    <input type="text" id="search-input" placeholder="搜索聊天记录...">
+  </div>
+
+  <div id="chat-history"></div>
+
+  <div class="footer">
+    <span class="version">AI Chat Sidebar v1.0</span>
+  </div>
+</div>
+
+<div class="status-toast" id="status-toast"></div>
+
+<script src="sidebar.js"></script>
+</body>
+</html>

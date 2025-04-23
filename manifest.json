@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "AI Chat Sidebar",
+  "description": "在屏幕显示 Copilot/ChatGPT 聊天记录侧边栏",
+  "version": "1.0",
+  "permissions": ["scripting", "activeTab", "storage"],
+  "action": {
+    "default_title": "显示聊天侧边栏"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://github.com/copilot/c/*",
+        "https://copilot.github.com/*",
+        "https://chatgpt.com/c/*"
+      ],
+      "js": ["content.js"],
+      "css": ["sidebar.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["sidebar.html", "sidebar.js", "sidebar.css", "icon.png"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "icons": {
+    "16": "icon.png",
+    "32": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}
