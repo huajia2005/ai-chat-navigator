@@ -1,17 +1,17 @@
 /* 命名空间前缀，避免样式污染 */
 .ai-sidebar {
-  --primary-color: #4F46E5;
-  --primary-light: #EEF2FF;
-  --primary-gradient: linear-gradient(135deg, #4F46E5, #7C3AED);
-  --primary-hover: #4338CA;
-  --text-primary: #1F2937;
-  --text-secondary: #4B5563;
-  --text-light: #6B7280;
-  --border-light: #E5E7EB;
+  --primary-color: #666666;
+  --primary-light: #F0F0F0;
+  --primary-gradient: linear-gradient(135deg, #444444, #666666);
+  --primary-hover: #555555;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-light: #888888;
+  --border-light: #E0E0E0;
   --shadow-color: rgba(0, 0, 0, 0.08);
   --accent-color: #10B981;
-  --highlight: #F3F4FF;
-  --radius: 10px;
+  --highlight: #F5F5F5;
+  --radius: 6px;
   --card-bg: #FFFFFF;
 
   /* 重置所有样式，避免继承 */
@@ -74,7 +74,7 @@ html, body {
 
 #search-container {
   padding: 10px;
-  background: rgba(249, 250, 251, 0.8);
+  background: rgba(247, 248, 250, 0.8);
   backdrop-filter: blur(10px);
   position: sticky;
   top: 46px;
@@ -96,7 +96,7 @@ html, body {
 
 #search-input:focus {
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+  box-shadow: 0 0 0 2px rgba(102, 102, 102, 0.2);
   transform: translateY(-1px);
 }
 
@@ -121,12 +121,12 @@ html, body {
 }
 
 #chat-history::-webkit-scrollbar-thumb {
-  background: rgba(79, 70, 229, 0.15);
+  background: rgba(0, 0, 0, 0.1);
   border-radius: 3px;
 }
 
 #chat-history::-webkit-scrollbar-thumb:hover {
-  background: rgba(79, 70, 229, 0.3);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 /* 每条历史记录 */
@@ -191,7 +191,7 @@ html, body {
 }
 
 .search-highlight {
-  background: rgba(79, 70, 229, 0.15);
+  background: rgba(0, 0, 0, 0.12);
   border-radius: 2px;
   padding: 0 2px;
   font-weight: 500;
@@ -212,7 +212,7 @@ html, body {
   font-size: 32px;
   color: #ccc;
   margin-bottom: 16px;
-  background: #F3F4FF;
+  background: #F5F5F5;
   height: 64px;
   width: 64px;
   display: flex;
@@ -271,45 +271,45 @@ html, body {
 /* 暗黑模式支持 */
 @media (prefers-color-scheme: dark) {
   #app-container {
-    background-color: #111827;
-    color: #F3F4F6;
+    background-color: #1E1E1E;
+    color: #E0E0E0;
   }
 
   .ai-sidebar {
-    --text-primary: #F9FAFB;
-    --text-secondary: #E5E7EB;
-    --text-light: #9CA3AF;
-    --border-light: #374151;
-    --highlight: #1E293B;
+    --text-primary: #E0E0E0;
+    --text-secondary: #BBBBBB;
+    --text-light: #999999;
+    --border-light: #444444;
+    --highlight: #2A2A2A;
     --shadow-color: rgba(0, 0, 0, 0.3);
-    --card-bg: #1F2937;
+    --card-bg: #2A2A2A;
   }
 
   #search-input {
-    background: #1F2937;
-    color: #F3F4F6;
-    border-color: #374151;
+    background: #333333;
+    color: #E0E0E0;
+    border-color: #444444;
   }
 
   #search-container {
-    background: rgba(31, 41, 55, 0.8);
+    background: rgba(35, 35, 35, 0.8);
   }
 
   .footer {
-    background: #1F2937;
-    border-top-color: #374151;
+    background: #1E1E1E;
+    border-top-color: #444444;
   }
 
   .empty-icon {
-    background: #252F3F;
-    color: #6B7280;
+    background: #2A2A2A;
+    color: #666666;
   }
 
   .chat-msg.clickable:hover {
-    background: #1E293B;
+    background: #2A2A2A;
   }
 
   .search-highlight {
-    background: rgba(79, 70, 229, 0.3);
+    background: rgba(255, 255, 255, 0.2);
   }
 }

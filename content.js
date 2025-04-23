@@ -107,7 +107,7 @@
       transform: translateY(-50%);
       width: 44px;
       height: 44px;
-      background: linear-gradient(135deg, #4F46E5, #7C3AED);
+      background: linear-gradient(135deg, #444, #666);
       color: #fff;
       border-radius: 22px 0 0 22px;
       z-index: 100000;
@@ -115,7 +115,7 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       font-size: 22px;
       transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
       user-select: none;
@@ -123,7 +123,7 @@
     
     #ai-chat-sidebar-toggle-btn:hover {
       width: 56px;
-      box-shadow: 0 6px 16px rgba(124, 58, 237, 0.4);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
     }
     
     #ai-chat-sidebar-container {
@@ -132,10 +132,10 @@
       z-index: 99999;
       display: none;
       background: white;
-      border-radius: 12px;
-      box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+      border-radius: 10px;
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
       transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-      border: 1px solid rgba(0,0,0,0.1);
+      border: 1px solid rgba(0, 0, 0, 0.1);
       resize: both;
       min-width: ${MIN_WIDTH}px;
       min-height: ${MIN_HEIGHT}px;
@@ -145,7 +145,7 @@
     .ai-sidebar-dragging {
       transition: none !important; /* 拖动时禁用过渡效果 */
       opacity: 0.92; /* 轻微透明度，提供视觉反馈 */
-      box-shadow: 0 8px 24px rgba(0,0,0,0.2); /* 拖动时增强阴影 */
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); /* 拖动时增强阴影 */
       will-change: top, right; /* 优化浏览器渲染 */
     }
 
@@ -168,7 +168,7 @@
       bottom: 0;
       right: 0;
       cursor: nwse-resize;
-      background: rgba(0,0,0,0.05);
+      background: rgba(0, 0, 0, 0.05);
       border-radius: 0 0 4px 0;
       z-index: 1;
       display: flex;
@@ -179,7 +179,7 @@
     }
     
     .ai-sidebar-resize-handle:hover {
-      background: rgba(79, 70, 229, 0.1);
+      background: rgba(0, 0, 0, 0.1);
       opacity: 1;
     }
     
@@ -191,7 +191,7 @@
       height: 40px;
       cursor: move;
       z-index: 1;
-      background: linear-gradient(135deg, rgba(79, 70, 229, 0.05), transparent);
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.05), transparent);
       opacity: 0;
       transition: opacity 0.2s;
     }
@@ -203,8 +203,8 @@
     /* 高亮选中的消息 */
     .ai-sidebar-highlight {
       transition: all 0.5s ease;
-      background: rgba(79, 70, 229, 0.1) !important;
-      box-shadow: 0 0 0 2px #4F46E5 !important;
+      background: rgba(0, 0, 0, 0.08) !important;
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15) !important;
       border-radius: 4px !important;
     }
   `;
@@ -251,7 +251,7 @@
   toggleBtn.onclick = function () {
     if (container.style.display === 'none' || !container.style.display) {
       container.style.display = 'block';
-      toggleBtn.style.background = 'linear-gradient(135deg, #4338CA, #6D28D9)';
+      toggleBtn.style.background = 'linear-gradient(135deg, #333, #555)';
 
       // 如果保存了位置，应用它
       if (userSettings.position) {
@@ -261,7 +261,7 @@
       }
     } else {
       container.style.display = 'none';
-      toggleBtn.style.background = 'linear-gradient(135deg, #4F46E5, #7C3AED)';
+      toggleBtn.style.background = 'linear-gradient(135deg, #444, #666)';
 
       // 保存当前尺寸
       saveSettings();

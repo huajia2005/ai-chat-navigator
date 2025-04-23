@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "AI Chat Navigator",
   "description": "智能聊天助手侧边栏，轻松浏览、搜索和管理 Copilot 和 ChatGPT 的对话历史记录",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "author": "Your Name",
   "homepage_url": "https://github.com/huajia2005/ai-chat-navigator",
   "permissions": ["scripting", "activeTab", "storage"],
