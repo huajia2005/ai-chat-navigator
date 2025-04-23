@@ -6,8 +6,6 @@ let currentSiteName = '';
 // DOM 元素
 const chatHistoryEl = document.getElementById('chat-history');
 const searchInput = document.getElementById('search-input');
-const refreshBtn = document.getElementById('refresh-btn');
-const scrollTopBtn = document.getElementById('scroll-top-btn');
 const statusToast = document.getElementById('status-toast');
 const siteNameEl = document.getElementById('site-name');
 
@@ -24,42 +22,56 @@ function renderChatHistory(messages = []) {
   messages.sort((a, b) => parseInt(a.index) - parseInt(b.index));
   filteredMessages = messages;
 
-  // 分组：最近10条和更早的记录
-  const recentMessages = messages.slice(-10);
-  const olderMessages = messages.slice(0, -10);
-
-  // 如果有搜索，不分组
+  // 如果有搜索，只显示搜索结果
   const searchTerm = searchInput.value.trim().toLowerCase();
-
   if (searchTerm) {
-    renderMessageGroup(messages, '搜索结果', searchTerm);
-  } else {
-    // 有较早记录才显示分组
-    if (olderMessages.length > 0) {
-      renderMessageGroup(recentMessages, '最近对话', null, true);
-      renderMessageGroup(olderMessages, '较早对话');
+    const results = filterMessagesBySearchTerm(messages, searchTerm);
+    if (results.length === 0) {
+      renderNoResultsState(searchTerm);
     } else {
-      renderMessageGroup(messages, '所有对话');
+      renderMessageGroup(results, '搜索结果', searchTerm);
     }
+  } else {
+    // 没有搜索，显示所有消息，不分组
+    renderMessageGroup(messages, '所有对话');
   }
 }
 
+// 根据搜索词过滤消息
+function filterMessagesBySearchTerm(messages, searchTerm) {
+  if (!searchTerm) return messages;
+
+  // 高级匹配算法
+  const results = messages.filter(msg => {
+    // 精确匹配得分高
+    const exactMatch = msg.text.toLowerCase().includes(searchTerm);
+
+    // 支持多个关键词搜索（空格分隔）
+    const keywords = searchTerm.split(/\s+/);
+    const keywordMatch = keywords.length > 1 &&
+        keywords.every(keyword => msg.text.toLowerCase().includes(keyword));
+
+    return exactMatch || keywordMatch;
+  });
+
+  // 结果排序 - 优先显示更精确的匹配
+  results.sort((a, b) => {
+    // 计算匹配得分
+    const scoreA = getMatchScore(a.text.toLowerCase(), searchTerm);
+    const scoreB = getMatchScore(b.text.toLowerCase(), searchTerm);
+    return scoreB - scoreA; // 降序排列
+  });
+
+  return results;
+}
+
 // 渲染消息分组
-function renderMessageGroup(messages, title, searchTerm = null, isRecent = false) {
+function renderMessageGroup(messages, title, searchTerm = null) {
   if (!messages || messages.length === 0) return;
-
-  const section = document.createElement('div');
-  section.className = 'chat-section';
-
-  const header = document.createElement('div');
-  header.className = 'section-header';
-  header.textContent = `${title} (${messages.length})`;
-  section.appendChild(header);
 
   messages.forEach((msgObj, idx) => {
     const msgEl = document.createElement('div');
     msgEl.className = 'chat-msg clickable';
-    if (isRecent) msgEl.classList.add('recent');
 
     const numberEl = document.createElement('span');
     numberEl.className = 'msg-number';
@@ -79,21 +91,17 @@ function renderMessageGroup(messages, title, searchTerm = null, isRecent = false
     msgEl.appendChild(contentEl);
 
     msgEl.dataset.index = msgObj.index;
-    msgEl.title = `消息 #${parseInt(msgObj.index) + 1}: ${msgObj.text}`;
+    msgEl.title = `点击定位到原始消息 #${parseInt(msgObj.index) + 1}`;
 
     msgEl.onclick = function() {
       window.parent.postMessage({
         type: 'COPILOT_SCROLL_TO',
         index: msgObj.index
       }, '*');
-
-      showToast(`正在定位到消息 #${parseInt(msgObj.index) + 1}`, 'success');
     };
 
-    section.appendChild(msgEl);
+    chatHistoryEl.appendChild(msgEl);
   });
-
-  chatHistoryEl.appendChild(section);
 }
 
 // 更新网站名称显示
@@ -106,12 +114,43 @@ function updateSiteName(name) {
   }
 }
 
-// 高亮搜索词
+// 计算文本与搜索词的匹配度
+function getMatchScore(text, searchTerm) {
+  let score = 0;
+
+  // 完整匹配得高分
+  if (text === searchTerm) score += 100;
+
+  // 包含完整搜索词得分
+  if (text.includes(searchTerm)) score += 50;
+
+  // 搜索词在开头得额外分
+  if (text.startsWith(searchTerm)) score += 25;
+
+  // 分词匹配
+  const keywords = searchTerm.split(/\s+/);
+  keywords.forEach(keyword => {
+    if (text.includes(keyword)) score += 10;
+  });
+
+  return score;
+}
+
+// 高亮搜索词增强版
 function highlightSearchTerm(text, searchTerm) {
   if (!searchTerm) return text;
 
-  const regex = new RegExp(`(${escapeRegExp(searchTerm)})`, 'gi');
-  return text.replace(regex, '<span class="search-highlight">$1</span>');
+  // 支持多关键词高亮（空格分隔）
+  const keywords = searchTerm.split(/\s+/).map(k => escapeRegExp(k));
+  let highlightedText = text;
+
+  keywords.forEach(keyword => {
+    const regex = new RegExp(`(${keyword})`, 'gi');
+    highlightedText = highlightedText.replace(regex,
+        '<span class="search-highlight">$1</span>');
+  });
+
+  return highlightedText;
 }
 
 // 转义正则表达式特殊字符
@@ -130,59 +169,27 @@ function renderEmptyState() {
   `;
 }
 
-// 显示提示消息
-function showToast(message, type = '') {
-  statusToast.textContent = message;
-  statusToast.className = `status-toast show ${type}`;
-
-  setTimeout(() => {
-    statusToast.classList.remove('show');
-  }, 2500);
+// 渲染无搜索结果状态
+function renderNoResultsState(searchTerm) {
+  chatHistoryEl.innerHTML = `
+    <div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <div class="empty-title">无匹配结果</div>
+      <div class="empty-subtitle">没有找到包含 "${searchTerm}" 的聊天记录</div>
+    </div>
+  `;
 }
 
 // 搜索聊天记录
 function searchMessages() {
   const searchTerm = searchInput.value.trim().toLowerCase();
-
-  if (!searchTerm) {
-    renderChatHistory(allMessages);
-    return;
-  }
-
-  const results = allMessages.filter(msg =>
-      msg.text.toLowerCase().includes(searchTerm)
-  );
-
-  renderChatHistory(results);
-
-  if (results.length === 0) {
-    chatHistoryEl.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">🔍</div>
-        <div class="empty-title">无匹配结果</div>
-        <div class="empty-subtitle">没有找到包含 "${searchTerm}" 的聊天记录</div>
-      </div>
-    `;
-  } else {
-    showToast(`找到 ${results.length} 条匹配记录`);
-  }
+  renderChatHistory(allMessages);
 }
 
 // 初始化事件监听
 function initEventListeners() {
   // 搜索框输入
   searchInput.addEventListener('input', debounce(searchMessages, 300));
-
-  // 刷新按钮
-  refreshBtn.addEventListener('click', () => {
-    showToast('刷新中...');
-    window.parent.postMessage({ type: 'COPILOT_REFRESH' }, '*');
-  });
-
-  // 回到顶部按钮
-  scrollTopBtn.addEventListener('click', () => {
-    chatHistoryEl.scrollTo({ top: 0, behavior: 'smooth' });
-  });
 }
 
 // 防抖函数
@@ -209,7 +216,6 @@ window.addEventListener('message', function(event) {
 // 页面加载完成
 document.addEventListener('DOMContentLoaded', function() {
   initEventListeners();
-  showToast('AI聊天导航器已加载');
 });
 
 // 快捷键支持

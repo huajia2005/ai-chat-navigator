@@ -47,18 +47,45 @@
   const MIN_HEIGHT = 300;
   const MAX_WIDTH = 600;
 
+  // 获取默认位置 - 默认在右侧
+  function getDefaultPosition() {
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+
+    // 确保始终在右侧
+    return {
+      top: Math.max(60, Math.min(100, screenHeight * 0.1)) + 'px',
+      right: '10px',
+      left: 'auto'
+    };
+  }
+
   // 用户设置
   let userSettings = {
     width: DEFAULT_WIDTH,
     height: DEFAULT_HEIGHT,
-    position: { top: '100px', right: '0px' }
+    position: getDefaultPosition()
   };
 
   // 尝试从localStorage读取设置
   try {
     const savedSettings = localStorage.getItem('ai_chat_sidebar_settings');
     if (savedSettings) {
-      userSettings = JSON.parse(savedSettings);
+      const parsed = JSON.parse(savedSettings);
+      userSettings = {
+        ...userSettings,
+        ...parsed,
+        position: {
+          ...getDefaultPosition(),  // 始终使用默认右侧位置作为基础
+          ...parsed.position
+        }
+      };
+
+      // 确保右侧定位优先级高于左侧
+      if (userSettings.position.left && userSettings.position.left !== 'auto') {
+        userSettings.position.right = '10px';
+        userSettings.position.left = 'auto';
+      }
     }
   } catch (e) {
     console.error('读取侧边栏设置失败', e);
@@ -80,7 +107,7 @@
       transform: translateY(-50%);
       width: 44px;
       height: 44px;
-      background: linear-gradient(135deg, #0078d7, #00a2ff);
+      background: linear-gradient(135deg, #4F46E5, #7C3AED);
       color: #fff;
       border-radius: 22px 0 0 22px;
       z-index: 100000;
@@ -88,7 +115,7 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,120,215,0.3);
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
       font-size: 22px;
       transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
       user-select: none;
@@ -96,7 +123,7 @@
     
     #ai-chat-sidebar-toggle-btn:hover {
       width: 56px;
-      box-shadow: 0 6px 16px rgba(0,120,215,0.4);
+      box-shadow: 0 6px 16px rgba(124, 58, 237, 0.4);
     }
     
     #ai-chat-sidebar-container {
@@ -105,7 +132,7 @@
       z-index: 99999;
       display: none;
       background: white;
-      border-radius: 8px;
+      border-radius: 12px;
       box-shadow: 0 5px 25px rgba(0,0,0,0.15);
       transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
       border: 1px solid rgba(0,0,0,0.1);
@@ -114,17 +141,30 @@
       min-height: ${MIN_HEIGHT}px;
       max-width: ${MAX_WIDTH}px;
     }
+
+    .ai-sidebar-dragging {
+      transition: none !important; /* 拖动时禁用过渡效果 */
+      opacity: 0.92; /* 轻微透明度，提供视觉反馈 */
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2); /* 拖动时增强阴影 */
+      will-change: top, right; /* 优化浏览器渲染 */
+    }
+
+    .ai-sidebar-resizing {
+      transition: none !important;
+      will-change: width, height; /* 优化浏览器渲染 */
+    }
     
     #ai-chat-sidebar-iframe {
       width: 100%;
       height: 100%;
       border: none;
+      display: block;
     }
     
     .ai-sidebar-resize-handle {
       position: absolute;
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       bottom: 0;
       right: 0;
       cursor: nwse-resize;
@@ -139,7 +179,7 @@
     }
     
     .ai-sidebar-resize-handle:hover {
-      background: rgba(0,120,215,0.1);
+      background: rgba(79, 70, 229, 0.1);
       opacity: 1;
     }
     
@@ -148,10 +188,10 @@
       top: 0;
       left: 0;
       width: 100%;
-      height: 30px;
+      height: 40px;
       cursor: move;
       z-index: 1;
-      background: linear-gradient(135deg, rgba(0,120,215,0.05), transparent);
+      background: linear-gradient(135deg, rgba(79, 70, 229, 0.05), transparent);
       opacity: 0;
       transition: opacity 0.2s;
     }
@@ -163,8 +203,8 @@
     /* 高亮选中的消息 */
     .ai-sidebar-highlight {
       transition: all 0.5s ease;
-      background: rgba(0, 120, 215, 0.1) !important;
-      box-shadow: 0 0 0 2px #0078d7 !important;
+      background: rgba(79, 70, 229, 0.1) !important;
+      box-shadow: 0 0 0 2px #4F46E5 !important;
       border-radius: 4px !important;
     }
   `;
@@ -186,6 +226,7 @@
   container.style.height = userSettings.height + 'px';
   container.style.top = userSettings.position.top;
   container.style.right = userSettings.position.right;
+  container.style.left = userSettings.position.left || 'auto';
   document.body.appendChild(container);
 
   // 创建拖动手柄
@@ -210,16 +251,17 @@
   toggleBtn.onclick = function () {
     if (container.style.display === 'none' || !container.style.display) {
       container.style.display = 'block';
-      toggleBtn.style.background = 'linear-gradient(135deg, #106ebe, #0091ea)';
+      toggleBtn.style.background = 'linear-gradient(135deg, #4338CA, #6D28D9)';
 
       // 如果保存了位置，应用它
       if (userSettings.position) {
         container.style.top = userSettings.position.top;
-        container.style.right = userSettings.position.right;
+        container.style.right = userSettings.position.right || '10px';
+        container.style.left = userSettings.position.left || 'auto';
       }
     } else {
       container.style.display = 'none';
-      toggleBtn.style.background = 'linear-gradient(135deg, #0078d7, #00a2ff)';
+      toggleBtn.style.background = 'linear-gradient(135deg, #4F46E5, #7C3AED)';
 
       // 保存当前尺寸
       saveSettings();
@@ -232,11 +274,12 @@
     const height = container.offsetHeight;
     const top = container.style.top;
     const right = container.style.right;
+    const left = container.style.left;
 
     userSettings = {
       width,
       height,
-      position: { top, right }
+      position: { top, right, left }
     };
 
     try {
@@ -250,31 +293,69 @@
   let isDragging = false;
   let dragOffsetX, dragOffsetY;
 
+  // 添加全局拖动遮罩，避免与页面其他元素交互
+  function addDragOverlay() {
+    // 移除已有的遮罩（如果存在）
+    removeDragOverlay();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'ai-sidebar-drag-overlay';
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 99998;
+      cursor: move;
+      background: transparent;
+    `;
+    document.body.appendChild(overlay);
+  }
+
+  // 移除拖动遮罩
+  function removeDragOverlay() {
+    const overlay = document.getElementById('ai-sidebar-drag-overlay');
+    if (overlay) {
+      overlay.remove();
+    }
+  }
+
   dragHandle.addEventListener('mousedown', function(e) {
     isDragging = true;
     dragOffsetX = e.clientX - container.getBoundingClientRect().left;
     dragOffsetY = e.clientY - container.getBoundingClientRect().top;
+
+    // 添加过渡类以实现更平滑的拖动
+    container.classList.add('ai-sidebar-dragging');
+    addDragOverlay();
     document.body.style.userSelect = 'none';
-    e.preventDefault(); // 阻止默认行为
+    e.preventDefault();
     e.stopPropagation(); // 阻止事件冒泡
   });
 
   document.addEventListener('mousemove', function(e) {
     if (!isDragging) return;
 
-    const x = e.clientX - dragOffsetX;
-    const y = e.clientY - dragOffsetY;
+    // 使用requestAnimationFrame提高性能
+    requestAnimationFrame(() => {
+      const x = e.clientX - dragOffsetX;
+      const y = e.clientY - dragOffsetY;
 
-    // 确保侧边栏不会被拖出视口
-    const maxX = window.innerWidth - container.offsetWidth;
-    const maxY = window.innerHeight - container.offsetHeight;
+      // 确保侧边栏不会被拖出视口
+      const maxX = window.innerWidth - container.offsetWidth;
+      const maxY = window.innerHeight - container.offsetHeight;
 
-    const constrainedX = Math.max(0, Math.min(x, maxX));
-    const constrainedY = Math.max(0, Math.min(y, maxY));
+      const constrainedX = Math.max(0, Math.min(x, maxX));
+      const constrainedY = Math.max(0, Math.min(y, maxY));
 
-    container.style.left = constrainedX + 'px';
-    container.style.top = constrainedY + 'px';
-    container.style.right = 'auto';
+      // 设置为右侧定位，而不是左侧
+      const rightPosition = window.innerWidth - constrainedX - container.offsetWidth;
+
+      container.style.right = rightPosition + 'px';
+      container.style.left = 'auto';
+      container.style.top = constrainedY + 'px';
+    });
 
     e.preventDefault(); // 阻止默认行为
   });
@@ -282,7 +363,11 @@
   document.addEventListener('mouseup', function(e) {
     if (isDragging) {
       isDragging = false;
+      container.classList.remove('ai-sidebar-dragging');
       document.body.style.userSelect = '';
+
+      // 移除拖动遮罩
+      removeDragOverlay();
 
       // 保存新位置
       saveSettings();
@@ -291,10 +376,75 @@
     }
   });
 
+  // 添加resize遮罩
+  function addResizeOverlay() {
+    // 移除已有的遮罩
+    removeResizeOverlay();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'ai-sidebar-resize-overlay';
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 99998;
+      cursor: nwse-resize;
+      background: transparent;
+    `;
+    document.body.appendChild(overlay);
+  }
+
+  // 移除resize遮罩
+  function removeResizeOverlay() {
+    const overlay = document.getElementById('ai-sidebar-resize-overlay');
+    if (overlay) {
+      overlay.remove();
+    }
+  }
+
+  // 优化resize处理
+  document.addEventListener('mousedown', function(e) {
+    // 检查是否点击了resize手柄
+    if (e.target === resizeHandle) {
+      container.classList.add('ai-sidebar-resizing');
+      addResizeOverlay();
+    }
+  });
+
+  document.addEventListener('mouseup', function() {
+    if (container.classList.contains('ai-sidebar-resizing')) {
+      container.classList.remove('ai-sidebar-resizing');
+      removeResizeOverlay();
+      saveSettings();
+    }
+  });
+
   // 调整大小后保存设置
-  let resizeObserver = new ResizeObserver(debounce(() => {
-    saveSettings();
-  }, 500));
+  let resizeObserver = new ResizeObserver(entries => {
+    // 如果不是正在拖动大小，则保存设置
+    if (!container.classList.contains('ai-sidebar-resizing')) {
+      const entry = entries[0];
+      if (entry && entry.contentRect) {
+        const { width, height } = entry.contentRect;
+
+        if (width > 0 && height > 0 &&
+            width !== userSettings.width &&
+            height !== userSettings.height) {
+
+          userSettings.width = width;
+          userSettings.height = height;
+
+          // 使用节流函数保存设置，避免频繁写入
+          clearTimeout(window.resizeSettingsTimer);
+          window.resizeSettingsTimer = setTimeout(() => {
+            saveSettings();
+          }, 500);
+        }
+      }
+    }
+  });
 
   resizeObserver.observe(container);
 
@@ -329,6 +479,7 @@
 
   // 标记iframe是否ready，防止postMessage丢失
   let iframeReady = false;
+  let lastHistoryUpdate = 0;
 
   // 向iframe发送网站配置
   function sendSiteConfigToIframe() {
@@ -352,11 +503,37 @@
     // 立即执行一次采集
     fetchAndSendChatHistory();
 
-    // 然后定时执行
-    setInterval(fetchAndSendChatHistory, 2000);
+    // 减少更新频率，只有当内容变化时才更新
+    setInterval(checkForHistoryUpdates, 5000);
   };
 
+  // 检查历史记录更新，只在必要时发送
+  function checkForHistoryUpdates() {
+    // 限制更新频率
+    const now = Date.now();
+    if (now - lastHistoryUpdate < 2000) return;
+
+    // 使用当前站点的选择器配置
+    const userMessageSelector = currentSiteConfig.userMessageSelector;
+    const chatNodes = deepQuerySelectorAll(userMessageSelector);
+
+    // 只有当消息数量有变化，或者最后一条消息有变化时才更新
+    const currentCount = chatNodes.length;
+
+    if (currentCount > 0) {
+      const lastMessage = chatNodes[currentCount - 1].innerText.trim();
+
+      if (window.lastMessageCache !== lastMessage || window.lastMessageCount !== currentCount) {
+        window.lastMessageCache = lastMessage;
+        window.lastMessageCount = currentCount;
+        fetchAndSendChatHistory();
+      }
+    }
+  }
+
   function fetchAndSendChatHistory() {
+    lastHistoryUpdate = Date.now();
+
     // 使用当前站点的选择器配置
     const userMessageSelector = currentSiteConfig.userMessageSelector;
     const chatNodes = deepQuerySelectorAll(userMessageSelector);
