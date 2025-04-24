@@ -17,6 +17,29 @@
       scrollTargetSelector: '.text-message[data-message-author-role="user"]',
       containerSelector: '.conversation',
       siteName: 'OpenAI ChatGPT'
+    },
+    // Claude 选择器
+    'claude.ai': {
+      userMessageSelector: '[data-testid="user-message"]',
+      scrollTargetSelector: '[data-testid="user-message"]',
+      containerSelector: '.conversation-container',
+      siteName: 'Anthropic Claude'
+    },
+    // Gemini 选择器
+    'gemini.google.com': {
+      userMessageSelector: '.query-text',
+      scrollTargetSelector: '.horizontal-container',
+      containerSelector: '.chat-messages',
+      siteName: 'Google Gemini',
+      // 为 Gemini 添加特殊处理标记
+      specialHandling: true
+    },
+    // Grok 选择器
+    'grok.com': {
+      userMessageSelector: '.whitespace-pre-wrap',
+      scrollTargetSelector: '.whitespace-pre-wrap',
+      containerSelector: '.whitespace-pre-wrap',
+      siteName: 'X Grok'
     }
   };
 
@@ -540,15 +563,43 @@
 
     let messages = [];
     chatNodes.forEach((node, idx) => {
-      const userMsg = node.innerText.trim();
+      // 获取消息文本 - 处理 Gemini 特殊结构
+      let userMsg;
+      if (window.location.href.includes('gemini.google.com')) {
+        // Gemini 特殊处理 - 提取 p 元素内的文本
+        const paragraphs = node.querySelectorAll('p.query-text-line');
+        if (paragraphs && paragraphs.length > 0) {
+          userMsg = Array.from(paragraphs)
+              .map(p => p.innerText.trim())
+              .filter(text => text)
+              .join('\n');
+        } else {
+          userMsg = node.innerText.trim();
+        }
 
-      // 如果节点没有data-chat-history属性，我们自己添加一个
-      // 使用dataset API而不是直接设置attribute，避免属性泄漏
-      if (!node.dataset.aiChatHistory) {
-        node.dataset.aiChatHistory = idx;
+        // 为 Gemini 获取正确的滚动目标元素
+        const scrollTarget = node.closest(currentSiteConfig.scrollTargetSelector);
+        if (scrollTarget && !scrollTarget.dataset.aiChatHistory) {
+          scrollTarget.dataset.aiChatHistory = idx;
+        }
+      } else {
+        userMsg = node.innerText.trim();
+
+        // 为非 Gemini 站点添加标识
+        if (!node.dataset.aiChatHistory) {
+          node.dataset.aiChatHistory = idx;
+        }
       }
 
-      const historyIndex = node.dataset.aiChatHistory;
+      // 获取索引 - 针对不同平台有不同的处理
+      let historyIndex;
+      if (window.location.href.includes('gemini.google.com')) {
+        const scrollTarget = node.closest(currentSiteConfig.scrollTargetSelector);
+        historyIndex = scrollTarget ? scrollTarget.dataset.aiChatHistory : idx;
+      } else {
+        historyIndex = node.dataset.aiChatHistory || idx;
+      }
+
       if (userMsg) {
         messages.push({ index: historyIndex, text: userMsg });
       }
@@ -596,13 +647,34 @@
         // 滚动到目标位置
         target.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-        // 添加高亮样式，但不直接修改元素样式，而是添加类
-        target.classList.add('ai-sidebar-highlight');
+        // 针对 Gemini 的特殊高亮处理
+        if (currentSiteConfig.specialHandling && window.location.href.includes('gemini.google.com')) {
+          // 对于 Gemini，添加自定义样式，避免使用类
+          const originalBackground = target.style.background;
+          const originalBoxShadow = target.style.boxShadow;
+          const originalBorderRadius = target.style.borderRadius;
 
-        // 移除高亮
-        setTimeout(() => {
-          target.classList.remove('ai-sidebar-highlight');
-        }, 2000);
+          // 应用高亮样式
+          target.style.background = 'rgba(0, 0, 0, 0.08)';
+          target.style.boxShadow = '0 0 0 2px rgba(0, 0, 0, 0.15)';
+          target.style.borderRadius = '4px';
+          target.style.transition = 'all 0.5s ease';
+
+          // 移除高亮
+          setTimeout(() => {
+            target.style.background = originalBackground;
+            target.style.boxShadow = originalBoxShadow;
+            target.style.borderRadius = originalBorderRadius;
+          }, 2000);
+        } else {
+          // 对其他平台使用类名方式高亮
+          target.classList.add('ai-sidebar-highlight');
+
+          // 移除高亮
+          setTimeout(() => {
+            target.classList.remove('ai-sidebar-highlight');
+          }, 2000);
+        }
       }
     } else if (event.data && event.data.type === 'COPILOT_REFRESH') {
       // 手动刷新历史记录

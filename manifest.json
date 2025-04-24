@@ -20,7 +20,10 @@
       "matches": [
         "https://github.com/copilot/c/*",
         "https://copilot.github.com/*",
-        "https://chatgpt.com/c/*"
+        "https://chatgpt.com/c/*",
+        "https://claude.ai/*",
+        "https://gemini.google.com/*",
+        "https://grok.com/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle"
