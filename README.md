@@ -72,6 +72,8 @@ AI Chat Navigator 是一款专为 GitHub Copilot 和 OpenAI ChatGPT 用户设计
 - [Anthropic Claude](https://claude.ai/) (`claude.ai/*`)
 - [Google Gemini](https://gemini.google.com/) (`gemini.google.com/*`)
 - [Grok](https://grok.com) (`grok.x.ai/*`)
+- [DeepSeek](https://chat.deepseek.com/) (`chat.deepseek.com/*`)
+- [豆包](https://www.doubao.com/) (`doubao.ai/*`)
 
 我们计划未来添加对更多AI助手平台的支持。
 

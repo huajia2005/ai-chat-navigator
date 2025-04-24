@@ -23,7 +23,9 @@
         "https://chatgpt.com/c/*",
         "https://claude.ai/*",
         "https://gemini.google.com/*",
-        "https://grok.com/*"
+        "https://grok.com/*",
+        "https://chat.deepseek.com/*",
+        "https://www.doubao.com/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle"

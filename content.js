@@ -40,6 +40,19 @@
       scrollTargetSelector: '.whitespace-pre-wrap',
       containerSelector: '.whitespace-pre-wrap',
       siteName: 'X Grok'
+    },
+    'chat.deepseek.com': {
+      userMessageSelector: '.fbb737a4',
+      scrollTargetSelector: '.fbb737a4',
+      containerSelector: '.fbb737a4',
+      siteName: 'DeepSeek AI'
+    },
+    // 豆包 选择器 - 新增
+    'doubao.com': {
+      userMessageSelector: '[data-testid="send_message"]',
+      scrollTargetSelector: '[data-testid="send_message"]',
+      containerSelector: '.message-list',
+      siteName: '豆包AI'
     }
   };
 
